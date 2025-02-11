@@ -1,3 +1,5 @@
+from scipy import find_peaks
+import numpy as np
 def peaks2binary(nWinPnts, analogData, height=1):
     """
     convert analog data series (peaks) into binary data (1001020...), which is returned.
