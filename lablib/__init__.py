@@ -1,1 +1,1 @@
-from .core import greet
+from .core import peaks2binary
