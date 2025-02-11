@@ -1,4 +1,4 @@
-from scipy import find_peaks
+from scipy.signal import find_peaks
 import numpy as np
 def peaks2binary(nWinPnts, analogData, height=1):
     """
