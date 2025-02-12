@@ -11,3 +11,12 @@ def peaks2binary(nWinPnts, analogData, height=1):
     binary = peakPredicates[:-(len(analogData)%nWinPnts)].reshape((-1, nWinPnts))
     binary = binary.sum(axis=1)
     return binary
+def peaks2binary2(nWinPnts, analogData, height=1):
+    """
+    same as peaks2binary, but the binary has the same length as the analogData
+    """
+    idPeaks, _ = find_peaks(analogData, height=height)
+    peakPredicates = np.array([False]*len(analogData))
+    for id in idPeaks: peakPredicates[id] = True
+    binary = peakPredicates
+    return binary
