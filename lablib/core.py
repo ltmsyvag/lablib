@@ -15,6 +15,8 @@ def peaks2binary(nWinPnts, analogData, height=1):
 def peaks2binary2(nWinPnts, analogData, height=1):
     """
     same as peaks2binary, but the binary has the same length as the analogData
+    note that nWinPnts does nothing, it's just for the sake of compatibility with peaks2binary, 
+    so that fast switching between the two functions is possible
     """
     idPeaks, _ = find_peaks(analogData, height=height)
     peakPredicates = np.array([False]*len(analogData))
