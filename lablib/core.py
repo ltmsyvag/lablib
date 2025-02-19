@@ -8,7 +8,8 @@ def peaks2binary(nWinPnts, analogData, height=1):
     idPeaks, _ = find_peaks(analogData, height=height)
     peakPredicates = np.array([False]*len(analogData))
     for id in idPeaks: peakPredicates[id] = True
-    binary = peakPredicates[:-(len(analogData)%nWinPnts)].reshape((-1, nWinPnts))
+    remainder = len(analogData)%nWinPnts
+    binary = peakPredicates[:-remainder if remainder else None].reshape((-1, nWinPnts))
     binary = binary.sum(axis=1)
     return binary
 def peaks2binary2(nWinPnts, analogData, height=1):
