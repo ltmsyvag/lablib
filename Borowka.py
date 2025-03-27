@@ -1,5 +1,5 @@
 #%%
-from lablib102.myqfuns import steadystateMWM, make_decayRateDict
+from lablib102.qfuns import steadystateMWM, make_decayRateDict
 import numpy as np
 import matplotlib.pyplot as plt
 from arc import Rubidium85

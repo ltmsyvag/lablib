@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lablib102"
-version = "0.2.2"
+version = "0.2.3"
 description = "personal library for my lab"
 authors = [{ name = "haiteng" }]
 dependencies = []
