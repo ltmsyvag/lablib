@@ -1,5 +1,10 @@
 from scipy.constants import h, k
 import numpy as np
+from typing import Sequence
+from qutip import Qobj, projection,steadystate, qdiags
+import re
+from arc import Rubidium85, Rubidium87
+
 def n_th(freq, T):
     """
     return thermal photons. freq in Hz, T in K
@@ -25,8 +30,7 @@ def labelKet(N, ket):
         label = [0]*(nParts-len(label)) + label
         print(amplitude, label, sep = "\t")
 
-from typing import Sequence
-from qutip import Qobj, projection
+
 def Omega_couple(N: int, Omega, ij: Sequence[int]) -> Qobj:
     """
     `N` is space size, `Omega` is the usual Rabi frequency Ω
@@ -35,8 +39,7 @@ def Omega_couple(N: int, Omega, ij: Sequence[int]) -> Qobj:
     assert i != j, "Omega coupling cannot be diagonal"
     return (projection(N,i,j)+projection(N,j,i))*Omega
 
-from qutip import Qobj, projection
-import numpy as np
+
 def make_c_ops(N: int, decayDict: dict=None, dephaseDict: dict=None) -> list:
     c_ops = []
     if decayDict:
@@ -54,13 +57,13 @@ def make_c_ops(N: int, decayDict: dict=None, dephaseDict: dict=None) -> list:
             c_ops.append(L)
     return c_ops
 
-import re
-from arc import Rubidium85
+
 
 def make_decayRateDict(termList: list[str], 
                        additional_channels = [], 
                        unphysicalChannels = [], 
-                       temperature=400):
+                       temperature=400,
+                       use_Rb85 = False): # A102 uses 87
     """
     - additional channels 中用 string 写明非禁戒的自发辐射 decay channel, 
         比如 `"51"`, `"40"` (数字顺序无所谓 "40", 和 "04" 等价)
@@ -71,7 +74,11 @@ def make_decayRateDict(termList: list[str],
     """
     pattern = r"([1-9]?[0-9])[ ]*([A-Z])[ ]*([1-9])/([2])"
     nljList, decayRate, udStr = [], dict() , ""
-    atom = Rubidium85()
+    if use_Rb85:
+        atom = Rubidium85()
+    else:
+        atom = Rubidium87()
+
     letter_l_dict = {"S" : 0, "P" : 1, "D" : 2, "F" : 3, "G" : 4, "H" : 5, "I" : 6}
     
     for term in termList:
@@ -101,7 +108,7 @@ def make_decayRateDict(termList: list[str],
         # decayRate[key] = round(val*1e-6, 6) # might make calculation faster by eliminating too many significant digits
     return decayRate, udStr
 
-from qutip import steadystate, qdiags
+
 def steadystateMWM(termList: list[str],
                    Ωlist_no2pi: list, 
                    DeltaList_no2pi: list,
