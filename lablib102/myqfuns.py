@@ -55,7 +55,7 @@ def make_c_ops(N: int, decayDict: dict=None, dephaseDict: dict=None) -> list:
     return c_ops
 
 import re
-from arc import *
+from arc import Rubidium85
 
 def make_decayRateDict(termList: list[str], 
                        additional_channels = [], 
@@ -108,19 +108,30 @@ def steadystateMWM(termList: list[str],
                    nonNNchannels=[], 
                    unphysicalChannels=[],
                    laserDephList = [], # laser dephasings
-                   temperature=400):
+                   temperature=400,
+                   outer_decay_rate_dict= None):
     """
-    接收能级 term symbols, 拉比频率(MHz, 无 2π), 和 detuning 频率 (MHz, 无 2π), 
-    返回 Bloch 模型稳态密度矩阵.
-    本函数考虑 Rb87 自发辐射速率和所涉及有限能级(e.g. 6WM 就只有6个能级)之间的 300 K 黑体辐射速率.
-    如果有非近邻能级之间的自发辐射, 需要手动添加. 
-    nonNNchannels 的意思是 non-NearestNeighbor-channels.
-    用 dephList 添加 dephasing, 其中元素是 tuple, 格式是 ("51", 3) (能级 5,1 之间的 激光的有 3 MHz 的 dephasing)
+    - 接收能级 term symbols, 拉比频率(MHz, 无 2π), 和 detuning 频率 (MHz, 无 2π), 
+      返回 Bloch 模型稳态密度矩阵.
+    - 本函数考虑 Rb87 自发辐射速率和所涉及有限能级(e.g. 6WM 就只有6个能级)之间的 300 K 黑体辐射速率.
+    - 如果有非近邻能级之间的自发辐射, 需要手动添加. 
+    - nonNNchannels 的意思是 non-NearestNeighbor-channels.
+    - 用 dephList 添加 dephasing, 其中元素是 tuple, 格式是 ("51", 3) (能级 5,1 之间的 激光的有 3 MHz 的 dephasing)
+    - outer_decay_rate_dict 是 multiprocessing 需要的, 目前对这个参数的使用非常 hacky,
+      运行案例 0.2.1 commit 的 Borowka.py 测试文件的实现
+      解释: 因为并行运行的 make_decayRateDict 会造成对 arc 数据库 access 的 racing, 
+      此时只好让所有运行的函数从外部获取一个已经做好的 decay rate dict. 反正其中的内容是静态的,
+      在 termList 和温度一定时, 它不依赖于其他任何参量. 有时间应该用 OOP 的方式将 make_decayRateDict 
+      的输出作为某种“能级结构”对象的状态. 不要每次动态获取. 
     """
     Ωlist = [2*np.pi*e for e in Ωlist_no2pi]
     DeltaList = [2*np.pi*e for e in DeltaList_no2pi]
-    decayRate, udStr = make_decayRateDict(
-        termList, nonNNchannels, unphysicalChannels, temperature)
+    if outer_decay_rate_dict:
+        decayRate, udStr = outer_decay_rate_dict
+    else:
+        decayRate, udStr = make_decayRateDict(
+            termList, nonNNchannels, unphysicalChannels, temperature)
+        
     N, Ω, DeltaSumList =len(termList), dict(), [0]
 
     for i,j, Ωij in zip(range(N),range(1,N), Ωlist): Ω[f"{i}{j}"] = Ωij
