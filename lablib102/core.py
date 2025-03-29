@@ -32,7 +32,7 @@ def color_2nd_yax(c: type, color : str)->None:
     c.tick_params(colors = color) # tick color 
     c.spines["right"].set_color(color) # edge color
     c.yaxis.label.set_color(color) # label color
-def add_Axe_class_methods(c: type)-> type:
+def add_Axes_cls_methods(c: type)-> type:
     """
     decorator for plt.Axes type
     """
@@ -42,7 +42,7 @@ def add_Axe_class_methods(c: type)-> type:
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
-    plt.Axes = add_Axe_class_methods(plt.Axes) # decorate
+    plt.Axes = add_Axes_cls_methods(plt.Axes) # decorate
     
     fig, ax = plt.subplots()
     axx = ax.twinx()
