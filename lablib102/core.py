@@ -1,3 +1,4 @@
+#%%
 from scipy.signal import find_peaks
 import numpy as np
 def peaks2binary(nWinPnts, analogData, height=1):
@@ -23,3 +24,32 @@ def peaks2binary2(nWinPnts, analogData, height=1):
     for id in idPeaks: peakPredicates[id] = True
     binary = peakPredicates
     return binary
+
+def color_2nd_yax(c: type, color : str)->None:
+    """
+    decorator 专用函数, 将 Axes class 对象右侧 yax 涂成颜色 color
+    """
+    c.tick_params(colors = color) # tick color 
+    c.spines["right"].set_color(color) # edge color
+    c.yaxis.label.set_color(color) # label color
+def add_Axe_class_methods(c: type)-> type:
+    """
+    decorator for plt.Axes type
+    """
+    c.color_right_yax = color_2nd_yax
+    return c
+
+
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+    plt.Axes = add_Axe_class_methods(plt.Axes) # decorate
+    
+    fig, ax = plt.subplots()
+    axx = ax.twinx()
+    ax.plot([1,2] , label= 'line1')
+    line, = axx.plot([2,1], color = "r" , label= 'line2') # single item unpacking
+    lcolor = line.get_color() 
+    ax.legend(loc = (0,0))
+    axx.legend(loc = (1,1))
+    axx.set_ylabel("right")
+    axx.color_right_yax("r")
