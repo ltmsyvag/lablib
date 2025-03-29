@@ -36,7 +36,7 @@ def add_Axes_cls_methods(c: type)-> type:
     """
     decorator for plt.Axes type
     """
-    c.color_right_yax = color_2nd_yax
+    c.color_right_yax = color_right_yax
     return c
 
 
