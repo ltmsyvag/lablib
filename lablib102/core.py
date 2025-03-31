@@ -80,7 +80,7 @@ def fdata_keep_n_lowfreq_pnts(fdata: Sequence, nPositive_freq_pnts_kept: int)->n
 def data_keep_n_fft_pnts(data: Sequence, nPnts: int)->np.ndarray:
     fdata = fft(data)
     fdata_filtered = fdata_keep_n_lowfreq_pnts(fdata=fdata, nPositive_freq_pnts_kept=nPnts)
-    return ifft(fdata_filtered).real
+    return ifft(fdata_filtered).real # 注意只返回 real 部分, 这要求 data 本身是 real 的 (当然一般都是), 如果有复信号的特殊需求, 可以用 fdata_keep_n_lowfreq_pnts 再构造新的函数
 
 if __name__ == "__main__":
     
