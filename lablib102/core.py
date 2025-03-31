@@ -2,7 +2,8 @@
 from scipy.signal import find_peaks
 import numpy as np
 from matplotlib.axes import Axes
-from scipy.fft import fftshift, ifftshift
+from scipy.fft import fft, ifft, fftshift, ifftshift
+from collections.abc import Sequence
 
 def peaks2binary(nWinPnts, analogData, height=1):
     """
@@ -43,7 +44,7 @@ def extend_Axes_methods(c: type[Axes])-> type[Axes]: # 所有的类的 type 都�
     c.color_right_yax = color_right_yax # 追加一个实例方法
     return c
     
-def fdata_keep_n_lowfreq_pnts(fdata, nPositive_freq_pnts_kept: int)->np.ndarray:
+def fdata_keep_n_lowfreq_pnts(fdata: Sequence, nPositive_freq_pnts_kept: int)->np.ndarray:
     """
     一个简单的频域高频成分截断 filter, 可以用于对任何数据序列的 smoothing (不需要是时域数据)
     fft(data) 后得到的 fdata 频率序列有两种情况:
@@ -75,20 +76,16 @@ def fdata_keep_n_lowfreq_pnts(fdata, nPositive_freq_pnts_kept: int)->np.ndarray:
         sfdata[:nNegative_freq_pnts_thrown] = 0 # set negative high freq components to zero
     fdata_filtered = ifftshift(sfdata)
     return fdata_filtered
+
+def data_keep_n_fft_pnts(data: Sequence, nPnts: int)->np.ndarray:
+    fdata = fft(data)
+    fdata_filtered = fdata_keep_n_lowfreq_pnts(fdata=fdata, nPositive_freq_pnts_kept=nPnts)
+    return ifft(fdata_filtered)
+
 if __name__ == "__main__":
     
     import matplotlib.pyplot as plt
-    plt.Axes = extend_Axes_methods(plt.Axes) # decorate
-
-    fig, ax = plt.subplots()
-    axx = ax.twinx()
-    # ax.plot([1,2] , label= 'line1')
-    # line, = axx.plot([2,1], color = "r" , label= 'line2') # single item unpacking
-    # lcolor = line.get_color() 
-    # ax.legend(loc = (0,0))
-    # axx.legend(loc = (1,1))
-    # axx.set_ylabel("right")
-    axx.color_right_yax("r")
-
-    import inspect
-    print(inspect.getsource(plt.Axes.color_right_yax))
+    data = np.random.randn(101)
+    datafil = data_keep_n_fft_pnts(data, 20)
+    plt.plot(data)
+    plt.plot(datafil)
