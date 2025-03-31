@@ -1,6 +1,7 @@
 #%%
 from scipy.signal import find_peaks
 import numpy as np
+from matplotlib.axes import Axes
 def peaks2binary(nWinPnts, analogData, height=1):
     """
     convert analog data series (peaks) into binary data (1001020...), which is returned.
@@ -25,34 +26,35 @@ def peaks2binary2(nWinPnts, analogData, height=1):
     binary = peakPredicates
     return binary
 
-def color_right_yax(c: type, color : str)->None:
+
+def extend_Axes_methods(c: type[Axes])-> type[Axes]: # 所有的类的 type 都是 `type`, 但是由于下面的函数 type annotation 中要写具体的 class `Axes`, 因此, 反正都要 import 这个 `Axes` 对象, 就在 decorator 输入的 type annotation 中也 explicitly 写出 `type[Axes]` 吧. 否则直接写 `type` 也无不可
     """
-    decorator 专用函数, 将 Axes class 对象右侧 yax 涂成颜色 color
+    为 matplotlib Axes 实例(e.g. ax) 追加方法
     """
-    c.tick_params(colors = color) # tick color 
-    c.spines["right"].set_color(color) # edge color
-    c.yaxis.label.set_color(color) # label color
-def add_Axes_cls_methods(c: type)-> type:
-    """
-    decorator for plt.Axes type
-    """
-    c.color_right_yax = color_right_yax
+    def color_right_yax(self: Axes, color: str)->None:
+        """
+        decorator 专用函数, 将 Axes 对象右侧 yax 涂成颜色 color
+        """
+        self.tick_params(colors = color) # tick color 
+        self.spines["right"].set_color(color) # edge color
+        self.yaxis.label.set_color(color) # label color
+    c.color_right_yax = color_right_yax # 追加一个实例方法
     return c
-
-
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-    plt.Axes = add_Axes_cls_methods(plt.Axes) # decorate
     
-    # fig, ax = plt.subplots()
-    # axx = ax.twinx()
+if __name__ == "__main__":
+
+    import matplotlib.pyplot as plt
+    plt.Axes = extend_Axes_methods(plt.Axes) # decorate
+
+    fig, ax = plt.subplots()
+    axx = ax.twinx()
     # ax.plot([1,2] , label= 'line1')
     # line, = axx.plot([2,1], color = "r" , label= 'line2') # single item unpacking
     # lcolor = line.get_color() 
     # ax.legend(loc = (0,0))
     # axx.legend(loc = (1,1))
     # axx.set_ylabel("right")
-    # axx.color_right_yax("r")
+    axx.color_right_yax("r")
 
     import inspect
     print(inspect.getsource(plt.Axes.color_right_yax))
