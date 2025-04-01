@@ -38,7 +38,7 @@ def extend_Axes_methods(c: type[Axes])-> type[Axes]: # 所有的类的 type 都�
         """
         decorator 专用函数, 将 Axes 对象右侧 yax 涂成颜色 color
         """
-        self.tick_params(colors = color) # tick color 
+        self.tick_params(which = "both", colors = color) # tick color 
         self.spines["right"].set_color(color) # edge color
         self.yaxis.label.set_color(color) # label color
     c.color_right_yax = color_right_yax # 追加一个实例方法
@@ -82,6 +82,7 @@ def data_keep_n_fft_pnts(data: Sequence, nPnts: int)->np.ndarray:
     fdata_filtered = _fdata_keep_n_lowfreq_pnts(fdata=fdata, nPositive_freq_pnts_kept=nPnts)
     return ifft(fdata_filtered).real # 注意只返回 real 部分, 这要求 data 本身是 real 的 (当然一般都是), 如果有复信号的特殊需求, 可以用 fdata_keep_n_lowfreq_pnts 再构造新的函数
 
+# def normalize_to_01
 if __name__ == "__main__":
     
     import matplotlib.pyplot as plt
