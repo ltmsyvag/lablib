@@ -3,6 +3,8 @@ from scipy.signal import find_peaks
 import numpy as np
 from matplotlib.axes import Axes
 from scipy.fft import fft, ifft, fftshift, ifftshift
+from scipy.stats import norm
+from scipy.constants import k as kB, atomic_mass
 from collections.abc import Sequence
 from typing import Optional, Tuple
 
@@ -94,6 +96,50 @@ def normalize_to_01(dataset: np.ndarray, user_min_max: Optional[Tuple[float, flo
         themin, themax = dataset.min(), dataset.max()
     data_normed = (dataset - themin)/(themax - themin)
     return data_normed, (dataset.min(), dataset.max())
+
+def _velo_dist_discretization(
+        arr_velo_positive: np.ndarray, 
+        mu: float=0, 
+        sigma: float=174.8769038)->tuple: # 
+    """
+    +-+ <-- 该 bar 的面积为速度为 0 的原子的概率占比
+    | |
+    | +--+
+    | |  |
+    | |  +----+
+    | |  |    |
+    • •  •    •
+    0 v1 v2 … v_final <-- v_vinal 在输入速度列表中有, 在返回速度列表中会被删除
+
+    输入 [0, v1, v2, …, v_final] 一组速度(m/s), 不必等间距. 
+    然后函数根据用户输入的多普勒速度分布的 µ 和 sigma, 
+    给出包含负速度的一位速度数组, 以及每个速度的原子所对应的概率占比
+    返回 arr_velo, arr_probs 和总概率 prob_tot (作为离散化精细度的一个衡量)
+    
+    sigma 只不过是 sqrt(kB T/m), see Downes 2023
+    320 K (Borowka) : 174.8769038
+    417 K (A102 EIT) : 199.6298561
+    388 K (A102 产生光) : 192.5632154
+    """
+    #v 这是上面的 bar 的面积的列表, 是概率, 不是概率密度(bar 的高度)
+    arr_prob_positive = (norm.pdf(arr_velo_positive, mu, sigma)[:-1] # velo prob density val
+              * (arr_velo_positive[1:] - arr_velo_positive[:-1])) # velo bin size
+    arr_prob = np.hstack((np.flip(arr_prob_positive), arr_prob_positive))
+    arr_velo = np.hstack((-np.flip(arr_velo_positive), arr_velo_positive))[1:-1]
+    prob_tot = arr_prob.sum()
+    return arr_prob, arr_velo, prob_tot
+
+def velo_dist_discretization(
+        arr_velo_positive: Sequence, 
+        T: float,
+        use_Rb85 = False
+        )->tuple:
+    """
+    输入温度 T, 给出一维多普勒的 sigma
+    """
+    arr_velo_positive = np.array(arr_velo_positive)
+    sigma = np.sqrt(kB*T/atomic_mass/(85 if use_Rb85 else 87))
+    return _velo_dist_discretization(arr_velo_positive, sigma=sigma)
 
 if __name__ == "__main__":
     
