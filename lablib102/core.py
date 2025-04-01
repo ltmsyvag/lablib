@@ -4,6 +4,7 @@ import numpy as np
 from matplotlib.axes import Axes
 from scipy.fft import fft, ifft, fftshift, ifftshift
 from collections.abc import Sequence
+from typing import Optional, Tuple
 
 def peaks2binary(nWinPnts, analogData, height=1):
     """
@@ -38,7 +39,7 @@ def extend_Axes_methods(c: type[Axes])-> type[Axes]: # 所有的类的 type 都�
         """
         decorator 专用函数, 将 Axes 对象右侧 yax 涂成颜色 color
         """
-        self.tick_params(which = "both", colors = color) # tick color 
+        self.tick_params(which = "both", colors = color) # tick color, both major and minor ticks
         self.spines["right"].set_color(color) # edge color
         self.yaxis.label.set_color(color) # label color
     c.color_right_yax = color_right_yax # 追加一个实例方法
@@ -82,7 +83,18 @@ def data_keep_n_fft_pnts(data: Sequence, nPnts: int)->np.ndarray:
     fdata_filtered = _fdata_keep_n_lowfreq_pnts(fdata=fdata, nPositive_freq_pnts_kept=nPnts)
     return ifft(fdata_filtered).real # 注意只返回 real 部分, 这要求 data 本身是 real 的 (当然一般都是), 如果有复信号的特殊需求, 可以用 fdata_keep_n_lowfreq_pnts 再构造新的函数
 
-# def normalize_to_01
+def normalize_to_01(dataset: np.ndarray, user_min_max: Optional[Tuple[float, float]] = None):
+    """
+    自动用 dataset 的 min-max 将 dataset 归一到 0-1. 
+    如果用户指定了 min-max tuple, 就用用户 min-max 做归一化 (不一定归一到 0-1)
+    """
+    if user_min_max:
+        themin, themax = user_min_max
+    else:
+        themin, themax = dataset.min(), dataset.max()
+    data_normed = (dataset - themin)/(themax - themin)
+    return data_normed, (dataset.min(), dataset.max())
+
 if __name__ == "__main__":
     
     import matplotlib.pyplot as plt
