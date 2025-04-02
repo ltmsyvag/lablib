@@ -37,6 +37,7 @@ def extend_Axes_methods(c: type[Axes])-> type[Axes]: # 所有的类的 type 都�
     """
     为 matplotlib Axes 实例(e.g. ax) 追加方法
     """
+    assert c is Axes, "这个类装饰器仅用于装饰 plt.Axes 类"
     def color_right_yax(self: Axes, color: str)->None:
         """
         decorator 专用函数, 将 Axes 对象右侧 yax 涂成颜色 color
