@@ -2,8 +2,8 @@
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tools.setuptools]
-packages = ["lablib102"]
+[tool.setuptools.packages.find]
+include = ["mypackage1"]
 
 [project]
 name = "lablib102"
