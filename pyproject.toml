@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["lablib102"] # 确保只有 lablib102 一个包(folder)会被 pip 安装
+include = ["folder"] # 确保只有 lablib102 一个包(folder)会被 pip 安装
 
 [project]
 name = "lablib102"
