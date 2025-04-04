@@ -1,2 +1,0 @@
-#%%
-import lablib102
