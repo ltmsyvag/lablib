@@ -2,6 +2,9 @@
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tools.setuptools]
+packages = ["lablib102"]
+
 [project]
 name = "lablib102"
 version = "0.2.7"
